@@ -17,11 +17,12 @@ order by Transacciones desc
 
 
 
---PREGUNTA 02	¿Cuál es el monto total de ventas y la variación mensual para el top 5 de productos más vendidos en 2025?
+--PREGUNTA 02	¿Cuál es el monto total de ventas del año 2025 y la variación del monto mensual de ventas de enero a diciembre para el top 5 de productos más vendidos en 2025?
 select top 5
 id_producto
 , producto
 , monto_ventas = sum(precio_final)
+--literales
 , mes_2_1 = sum(case when mes = 2 then precio_final else 0 end) - sum(case when mes = 1 then precio_final else 0 end)
 , mes_3_2 = sum(case when mes = 3 then precio_final else 0 end) - sum(case when mes = 2 then precio_final else 0 end)
 , mes_4_3 = sum(case when mes = 4 then precio_final else 0 end) - sum(case when mes = 3 then precio_final else 0 end)
@@ -63,12 +64,12 @@ ORDER BY Transacciones DESC
 
 
 
---PREGUNTA 04	¿Cuál es el monto total de venta y su porcentaje por categoría y monto de ventas descontado correspondiente del 2025?
+--PREGUNTA 04	¿Cuál es el monto total de ventas por categoria y su porcentaje de participación correspondiente en el monto total de venta. Incluido el monto de ventas descontado por cada categoria en el 2025?
 select
 c.id_categoria,
 c.nombre as Categoria,
 sum(precio_final) as Monto,
-convert(decimal(10, 2), sum(precio_final) * 100.0 / sum(sum(precio_final)) over() ) as Monto_Porcentaje,
+convert(decimal(10, 2), sum(precio_final) * 1.0 / sum(sum(precio_final)) over() ) as Monto_Porcentaje,
 sum(monto_descuento) as Monto_Descontado
 from g4.Ventas v
 left join g4.DetalleVentas dv on v.id_venta = dv.id_venta
@@ -80,7 +81,7 @@ order by Monto desc
 
 
 
---PREGUNTA 05	¿Cuál es el top 3 de medios de pago con mayor cantidad de transacciones y el monto de ventas correspondiente del 2025?
+--PREGUNTA 05	¿Cuál es el top 3 de medios de pago con mayor cantidad de transacciones y su monto de ventas correspondiente del 2025?
 select 
 top 3
 m.id_medio_pago,
@@ -96,11 +97,11 @@ order by transacciones desc
 
 
 
---PREGUNTA 06	¿En qué horas se concentran la mayor cantidad de transacciones y su porcentaje de participación correspondiente en 2025? 
+--PREGUNTA 06	¿En qué horas se concentran la mayor cantidad de transacciones y su porcentaje de participación correspondiente con respecto al total de transacciones en el 2025? 
 select 
 DATEPART(HH,v.hora) as Hora,
 count(*) as Transacciones,
-convert(decimal(10, 2), count(*) * 100.0 / sum(count(*)) over()) as Monto_Porc
+convert(decimal(10, 2), count(*) * 1.0 / sum(count(*)) over()) as Monto_Porc
 from g4.Ventas v
 left join g4.DetalleVentas dv on v.id_venta = dv.id_venta
 where year(v.fecha) = 2025
@@ -161,17 +162,15 @@ order by Transacciones desc
 
 
 
---PREGUNTA 10	¿Cuál es el monto total de venta y el monto total descontado para cada uno de los trimestres de 2025?
+--PREGUNTA 10	¿Cuál es el monto total de venta por trimeste y su porcentaje de participacion correspondiente con respecto al monto total de venta. Incluir el monto total descontado para cada uno de los trimestres de 2025?
 select 
 DATEPART(QUARTER,v.fecha) as Trimestre,
 sum(precio_final) as Monto,
-sum(precio_final) * 100.0 / sum(sum(precio_final)) over() as Monto_Porcentaje,
+convert(decimal(10, 2), sum(precio_final) * 1.0 / sum(sum(precio_final)) over() ) as Monto_Porcentaje,
 sum(monto_descuento) as Monto_Descontado
 from g4.Ventas v
 left join g4.DetalleVentas dv on v.id_venta = dv.id_venta
 where year(v.fecha) = 2025
 group by DATEPART(QUARTER,v.fecha)
-
-
 
 
